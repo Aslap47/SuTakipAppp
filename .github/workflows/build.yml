@@ -1,0 +1,35 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Build Simulator App
+      run: |
+        xcodebuild build \
+          -project SuTakip/SuTakip.xcodeproj \
+          -scheme SuTakip \
+          -destination 'generic/platform=iOS Simulator' \
+          -derivedDataPath build \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO
+
+    - name: Zip App
+      run: |
+        cd build/Build/Products/Debug-iphonesimulator
+        zip -r SuTakipApp.app.zip *.app
+
+    - name: Upload Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: SuTakipApp-Simulator
+        path: build/Build/Products/Debug-iphonesimulator/SuTakipApp.app.zip
